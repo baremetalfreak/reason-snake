@@ -7,19 +7,21 @@ let stepSize = 20;
 type coordinates = (int, int)
 
 type gameState = {
-  foodPosition: coordinates,
+  foodPositions: list(coordinates),
   snake: list(coordinates),
   isGameOver: bool,
 };
 
 let setup = env => {
   Env.size(~width, ~height, env);
-  {snake: [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0)], foodPosition: (300, 300), isGameOver: false};
+  {snake: [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0)], foodPositions: [(300, 300)], isGameOver: false};
 };
 
 let draw_food = (state, env) => {
   Draw.fill(Constants.blue, env);
-  Draw.rect(~pos=state.foodPosition, ~width=20, ~height=20, env);
+  state.foodPositions |> List.iter(pos => {
+    Draw.rect(~pos=pos, ~width=20, ~height=20, env);
+  })
 };
 
 let draw_snake = (state, env) => {
@@ -56,8 +58,13 @@ let handleKey = (state, env) => {
       };
     let snakeTail = List.tl(state.snake);
     let isGameOver = isCollision(newHeadPos, snakeTail);
-    let newSnake = List.append(snakeTail, [newHeadPos]);
-    {...state, snake: newSnake, isGameOver};          
+    let hasEetenApple = List.exists(pos => newHeadPos == pos, state.foodPositions);
+    let newSnake = 
+      switch (hasEetenApple) {
+      | true => List.append(state.snake, [newHeadPos]);
+      | false => List.append(snakeTail, [newHeadPos]);
+      };
+    {...state, snake: newSnake, isGameOver};
   }
 };
 
