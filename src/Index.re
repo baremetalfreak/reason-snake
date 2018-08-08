@@ -43,6 +43,10 @@ let isCollision = (newHeadPos, snake) => {
   snake |> List.exists(pos => pos == newHeadPos);
 }
 
+let addRandomPosition = (foodPositions) => {
+  [(Random.int(width / stepSize) * stepSize, Random.int(height / stepSize) * stepSize), ...foodPositions];
+}
+
 let handleKey = (state, env) => {
   if (state.isGameOver) {
     state;
@@ -64,7 +68,12 @@ let handleKey = (state, env) => {
       | true => List.append(state.snake, [newHeadPos]);
       | false => List.append(snakeTail, [newHeadPos]);
       };
-    {...state, snake: newSnake, isGameOver};
+    let newFoodPositions =
+      switch (hasEetenApple) {
+      | true => addRandomPosition(List.filter(pos => pos != newHeadPos, state.foodPositions));
+      | false => state.foodPositions;
+      };
+    {snake: newSnake, isGameOver, foodPositions: newFoodPositions};
   }
 };
 
