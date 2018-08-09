@@ -97,6 +97,7 @@ let handleKey = (state, env) =>
   | (false, Right) => {...state, direction: Dright}
   | (false, Up) => {...state, direction: Dup}
   | (false, Down) => {...state, direction: Ddown}
+  | (true, Space) => setup(env)
   | (_, _) => state
   };
 
