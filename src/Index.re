@@ -21,11 +21,21 @@ type gameState = {
   deltaTime: float,
 };
 
+let getRandomPostion = () => (
+  Random.int(width / stepSize) * stepSize,
+  Random.int(height / stepSize) * stepSize,
+);
+
 let setup = env => {
   Env.size(~width, ~height, env);
   {
     snake: [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0)],
-    apples: [(300, 300)],
+    apples: [
+      getRandomPostion(),
+      getRandomPostion(),
+      getRandomPostion(),
+      getRandomPostion(),
+    ],
     isGameOver: false,
     direction: Dright,
     deltaTime: 0.0,
@@ -33,16 +43,6 @@ let setup = env => {
 };
 
 let isCollision = (head, snake) => snake |> List.exists(pos => pos == head);
-
-let addRandomPosition = apples => [
-  (
-    Random.int(width / stepSize) * stepSize,
-    Random.int(height / stepSize) * stepSize,
-  ),
-  ...apples,
-];
-
-let count = ref(4);
 let nextState = state => {
   let (squareX, squareY) =
     List.nth(state.snake, List.length(state.snake) - 1);
@@ -61,7 +61,10 @@ let nextState = state => {
       List.append(state.snake, [head]) : List.append(body, [head]);
   let apples =
     hasEaten ?
-      addRandomPosition(List.filter(pos => pos != head, state.apples)) :
+      [
+        getRandomPostion(),
+        ...List.filter(pos => pos != head, state.apples),
+      ] :
       state.apples;
   {...state, snake, isGameOver, apples, deltaTime: 0.0};
 };
@@ -92,13 +95,17 @@ let draw = (state, env) => {
 };
 
 let handleKey = (state, env) =>
-  switch (state.isGameOver, Env.keyCode(env)) {
-  | (false, Left) => {...state, direction: Dleft}
-  | (false, Right) => {...state, direction: Dright}
-  | (false, Up) => {...state, direction: Dup}
-  | (false, Down) => {...state, direction: Ddown}
-  | (true, Space) => setup(env)
-  | (_, _) => state
+  switch (state.isGameOver, state.direction, Env.keyCode(env)) {
+  | (false, Dright, Left) => {...state, direction: Dright}
+  | (false, _, Left) => {...state, direction: Dleft}
+  | (false, Dleft, Right) => {...state, direction: Dleft}
+  | (false, _, Right) => {...state, direction: Dright}
+  | (false, Ddown, Up) => {...state, direction: Ddown}
+  | (false, _, Up) => {...state, direction: Dup}
+  | (false, Dup, Down) => {...state, direction: Dup}
+  | (false, _, Down) => {...state, direction: Ddown}
+  | (true, _, Space) => setup(env)
+  | (_, _, _) => state
   };
 
 run(~setup, ~draw, ~keyTyped=handleKey, ());
