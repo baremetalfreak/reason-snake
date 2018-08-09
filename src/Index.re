@@ -29,7 +29,13 @@ let getRandomPostion = () => (
 let setup = env => {
   Env.size(~width, ~height, env);
   {
-    snake: [(0, 0), (20, 0), (40, 0), (60, 0), (80, 0)],
+    snake: [
+      (0 * stepSize, 0),
+      (1 * stepSize, 0),
+      (2 * stepSize, 0),
+      (3 * stepSize, 0),
+      (4 * stepSize, 0),
+    ],
     apples: [
       getRandomPostion(),
       getRandomPostion(),
@@ -72,12 +78,13 @@ let nextState = state => {
 let drawFood = (state, env) => {
   Draw.fill(Constants.blue, env);
   state.apples
-  |> List.iter(pos => Draw.rect(~pos, ~width=20, ~height=20, env));
+  |> List.iter(pos => Draw.rect(~pos, ~width=stepSize, ~height=stepSize, env));
 };
 
 let drawSnake = (state, env) => {
   Draw.fill(Constants.green, env);
-  state.snake |> List.iter(pos => Draw.rect(~pos, ~width=20, ~height=20, env));
+  state.snake
+  |> List.iter(pos => Draw.rect(~pos, ~width=stepSize, ~height=stepSize, env));
 };
 
 let draw = (state, env) => {
